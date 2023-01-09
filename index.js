@@ -1,5 +1,7 @@
 const http = require('http')
 const express = require('express')
+const { notStrictEqual } = require('assert')
+const { response } = require('express')
 const app = express()
 let contacts = [  
     {    
@@ -46,6 +48,12 @@ app.get('/api/persons/:id', (req, res) => {
         res.status(404).end()
     }
 
+})
+
+app.delete('/api/persons/:id', (req, res)=> {
+    const id = Number(req.params.id)
+    contacts = contacts.filter(contact => contact.id !== id)
+    res.status(204).end()
 })
 
 const PORT = 3001
