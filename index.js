@@ -1,8 +1,7 @@
 const http = require('http')
 const express = require('express')
-const { notStrictEqual } = require('assert')
-const { response } = require('express')
 const app = express()
+app.use(express.json())
 let contacts = [  
     {    
         id: 1,    
@@ -55,6 +54,24 @@ app.delete('/api/persons/:id', (req, res)=> {
     contacts = contacts.filter(contact => contact.id !== id)
     res.status(204).end()
 })
+
+const generateId = () => {
+    return Math.floor(Math.random()*1000)
+  }
+
+app.post("/api/persons", (req, res) => {
+    const body = req.body
+    console.log(body)
+    const contact ={
+        id: generateId(),
+        name: body.name,
+        number: body.number
+    }
+    contacts = contacts.concat(contact)
+    console.log(contacts)
+    res.json(contact)
+})
+
 
 const PORT = 3001
     app.listen(PORT, () => {
