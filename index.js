@@ -2,6 +2,7 @@ const http = require('http')
 const express = require('express')
 const app = express()
 app.use(express.json())
+
 let contacts = [  
     {    
         id: 1,    
@@ -46,7 +47,6 @@ app.get('/api/persons/:id', (req, res) => {
     else{
         res.status(404).end()
     }
-
 })
 
 app.delete('/api/persons/:id', (req, res)=> {
@@ -61,17 +61,27 @@ const generateId = () => {
 
 app.post("/api/persons", (req, res) => {
     const body = req.body
-    console.log(body)
+    if(!body.name || !body.number){
+        return res.status(400).json({ 
+            error: 'name or number missing' 
+        })
+    }
+    
+    const existsAlready = contacts.filter(contact => contact.name === body.name).length > 0
+
+    if (existsAlready){
+        return res.status(409).json({ 
+            error: 'name must be unique' 
+        })
+    }
     const contact ={
         id: generateId(),
         name: body.name,
         number: body.number
     }
     contacts = contacts.concat(contact)
-    console.log(contacts)
     res.json(contact)
 })
-
 
 const PORT = 3001
     app.listen(PORT, () => {
