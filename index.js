@@ -2,6 +2,17 @@ const http = require('http')
 const express = require('express')
 const app = express()
 app.use(express.json())
+var morgan = require('morgan')
+
+
+morgan.token('contact', (req) => {
+    if (req.method === "POST"){
+        return JSON.stringify(req.body)
+    }
+    return "" 
+})
+
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :contact'))
 
 let contacts = [  
     {    
