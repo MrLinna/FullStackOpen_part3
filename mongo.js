@@ -1,3 +1,5 @@
+require('dotenv').config()
+
 const e = require('express')
 const mongoose = require('mongoose')
 
@@ -6,8 +8,7 @@ if (process.argv.length<3) {
   process.exit(1)
 }
 
-const password = process.argv[2]
-const url = `mongodb+srv://fullstack:${password}@cluster0.ibxxa0c.mongodb.net/phoneBookDb?retryWrites=true&w=majority`
+const url = process.env.MONGODB_URI
 mongoose.set('strictQuery', false)
 mongoose.connect(url)
 
