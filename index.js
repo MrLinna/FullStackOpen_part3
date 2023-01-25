@@ -1,10 +1,12 @@
-const http = require('http')
+require('dotenv').config()
+const Contact = require('./models/contact')
 const express = require('express')
 const app = express()
 app.use(express.json())
 var morgan = require('morgan')
 
 const cors = require('cors')
+const { response } = require('express')
 app.use(cors())
 
 app.use(express.static('build'))
@@ -39,13 +41,21 @@ let contacts = [
         id: 4,    
         name: "Mary Poppendick",    
         number: "39-23-6423122"  
+    },  
+    {    
+        id: 5,    
+        name: "These numbers come from backend's index.js",    
+        number: "9876"  
     }
 ]
 
 app.get('/api/persons', (req, res) => {
-    res.json(contacts)
+    Contact.find({}).then(contacts=>{
+        res.json(contacts)
+    })
 })
 
+// counts contacts in this file
 app.get('/info', (req, res) => {
     res.send(`
         <p>Phonebook has info for ${contacts.length} people</p>
@@ -54,14 +64,9 @@ app.get('/info', (req, res) => {
 })
 
 app.get('/api/persons/:id', (req, res) => {
-    const id = Number(req.params.id)
-    const contact = contacts.find(contact => contact.id === id)
-    if (contact){
-        res.json(contact)
-    }
-    else{
-        res.status(404).end()
-    }
+    Contact.findById(req.params.id).then(note => {
+        res.json(note)
+    })
 })
 
 app.delete('/api/persons/:id', (req, res)=> {
@@ -70,35 +75,24 @@ app.delete('/api/persons/:id', (req, res)=> {
     res.status(204).end()
 })
 
-const generateId = () => {
-    return Math.floor(Math.random()*1000)
-  }
 
 app.post("/api/persons", (req, res) => {
     const body = req.body
-    if(!body.name || !body.number){
-        return res.status(400).json({ 
-            error: 'name or number missing' 
-        })
+    if (body.name === undefined || body.number === undefined){
+        return res.status(400).json({error: 'name or number missing'})
     }
     
-    const existsAlready = contacts.filter(contact => contact.name === body.name).length > 0
-
-    if (existsAlready){
-        return res.status(409).json({ 
-            error: 'name must be unique' 
-        })
-    }
-    const contact ={
-        id: generateId(),
-        name: body.name,
+    const contact = new Contact({
+        name:  body.name,
         number: body.number
-    }
-    contacts = contacts.concat(contact)
-    res.json(contact)
+    })
+
+    contact.save().then(savedContact => {
+        response.json(savedContact)
+    })
 })
 
-const PORT = process.env.PORT || 3001
+const PORT = process.env.PORT //|| 3001
     app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
