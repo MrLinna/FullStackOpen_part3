@@ -3,10 +3,6 @@ require('dotenv').config()
 const e = require('express')
 const mongoose = require('mongoose')
 
-if (process.argv.length<3) {
-  console.log('give password as argument')
-  process.exit(1)
-}
 
 const url = process.env.MONGODB_URI
 mongoose.set('strictQuery', false)
@@ -19,8 +15,7 @@ const contactSchema = new mongoose.Schema({
 
 const Contact = mongoose.model('Contact', contactSchema)
 
-// if the password is the only parameter
-if (process.argv.length == 3){
+if (process.argv.length == 2){
     console.log('phonebook:')
     Contact.find({}).then(result => {
         result.forEach(contact => {
@@ -31,8 +26,8 @@ if (process.argv.length == 3){
 }
 // if name and number are given as parameters
 else{
-    const name = process.argv[3]
-    const number = process.argv[4]
+    const name = process.argv[2]
+    const number = process.argv[3]
     const contact = new Contact({
         name: name,
         number: number,
