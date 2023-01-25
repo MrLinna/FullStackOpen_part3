@@ -6,7 +6,6 @@ app.use(express.json())
 var morgan = require('morgan')
 
 const cors = require('cors')
-const { response } = require('express')
 app.use(cors())
 
 app.use(express.static('build'))
@@ -55,12 +54,14 @@ app.get('/api/persons', (req, res) => {
     })
 })
 
-// counts contacts in this file
 app.get('/info', (req, res) => {
-    res.send(`
-        <p>Phonebook has info for ${contacts.length} people</p>
-        <p>${Date()}</p>
-    `)
+    Contact.find({}).then(contacts => {
+        res.send(`
+            <p>Phonebook has info for ${contacts.length} people</p>
+            <p>${Date()}</p>
+        `)
+    })
+    
 })
 
 app.get('/api/persons/:id', (req, res) => {
@@ -81,18 +82,18 @@ app.post("/api/persons", (req, res) => {
     if (body.name === undefined || body.number === undefined){
         return res.status(400).json({error: 'name or number missing'})
     }
-    
+
     const contact = new Contact({
-        name:  body.name,
+        name: body.name,
         number: body.number
     })
 
     contact.save().then(savedContact => {
-        response.json(savedContact)
+        res.json(savedContact)
     })
 })
 
-const PORT = process.env.PORT //|| 3001
+const PORT = process.env.PORT
     app.listen(PORT, () => {
     console.log(`Server running on port ${PORT}`)
 })
