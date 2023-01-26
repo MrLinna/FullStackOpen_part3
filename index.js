@@ -65,15 +65,24 @@ app.get('/info', (req, res) => {
 })
 
 app.get('/api/persons/:id', (req, res) => {
-    Contact.findById(req.params.id).then(note => {
-        res.json(note)
-    })
+    Contact.findById(req.params.id)
+        .then(note => {
+            if(note){
+                res.json(note)
+            }
+            else{
+                res.status(404).end()
+            }
+        })
+        .catch(error => next(error))
 })
 
-app.delete('/api/persons/:id', (req, res)=> {
-    const id = Number(req.params.id)
-    contacts = contacts.filter(contact => contact.id !== id)
-    res.status(204).end()
+app.delete('/api/persons/:id', (req, res, next)=> {
+    Contact.findByIdAndRemove(req.params.id)
+    .then(result => {
+        res.status(204).end()
+    })
+    .catch(error => next(error))
 })
 
 

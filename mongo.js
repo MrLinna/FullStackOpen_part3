@@ -14,7 +14,7 @@ const contactSchema = new mongoose.Schema({
 })
 
 const Contact = mongoose.model('Contact', contactSchema)
-
+// print contacts
 if (process.argv.length == 2){
     console.log('phonebook:')
     Contact.find({}).then(result => {
@@ -24,7 +24,7 @@ if (process.argv.length == 2){
         mongoose.connection.close()
     })
 }
-// if name and number are given as parameters
+// make a new contact if name and number are given as parameters
 else{
     const name = process.argv[2]
     const number = process.argv[3]
