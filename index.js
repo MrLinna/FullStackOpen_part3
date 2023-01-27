@@ -6,6 +6,7 @@ app.use(express.json())
 var morgan = require('morgan')
 
 const cors = require('cors')
+const { response } = require('express')
 app.use(cors())
 
 app.use(express.static('build'))
@@ -100,6 +101,16 @@ app.post("/api/persons", (req, res) => {
     contact.save().then(savedContact => {
         res.json(savedContact)
     })
+})
+
+app.put("/api/persons/:id",(req,res, next)=>{
+    const body = req.body
+    const contact = {name: body.name, number: body.number}
+    Contact.findByIdAndUpdate(req.params.id, contact, {new: true})
+        .then (updatedContact => {
+            res.json(updatedContact)
+        })
+        .catch(error => next(error))
 })
 
 const PORT = process.env.PORT
