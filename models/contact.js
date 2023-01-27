@@ -13,12 +13,12 @@ mongoose.connect(url)
     console.log('error connecting to MongoDB:', error.message)
   })
 
-const noteSchema = new mongoose.Schema({
-  name: String,
+const contactSchema = new mongoose.Schema({
+  name: {type: String, minlength: 3},
   number: String,
 })
 
-noteSchema.set('toJSON', {
+contactSchema.set('toJSON', {
   transform: (document, returnedObject) => {
     returnedObject.id = returnedObject._id.toString()
     delete returnedObject._id
@@ -26,4 +26,4 @@ noteSchema.set('toJSON', {
   }
 })
 
-module.exports = mongoose.model('Contact', noteSchema)
+module.exports = mongoose.model('Contact', contactSchema)

@@ -20,34 +20,22 @@ morgan.token('contact', (req) => {
 
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :contact'))
 
-let contacts = [  
-    {    
-        id: 1,    
-        name: "Arto Hellas",    
-        number: "040-123456" 
-    },  
-    {    
-        id: 2,    
-        name: "Ada Lovelance",    
-        number: "39-44-5323523"    
-            
-    },  
-    {    
-        id: 3,    
-        name: "Dan Abramov",    
-        number: "12-43-234345"  
-    },  
-    {    
-        id: 4,    
-        name: "Mary Poppendick",    
-        number: "39-23-6423122"  
-    },  
-    {    
-        id: 5,    
-        name: "These numbers come from backend's index.js",    
-        number: "9876"  
+const unknownEndpoint = (request, response) => {
+    response.status(404).send({ error: 'unknown endpoint' })
+  }
+  
+  const errorHandler = (error, request, response, next) => {
+    console.error(error.message)
+  
+    if (error.name === 'CastError') {
+      return response.status(400).send({ error: 'malformatted id' })
+    } else if (error.name === 'ValidationError') {
+      return response.status(400).json({ error: error.message })
     }
-]
+  
+    next(error)
+  }
+
 
 app.get('/api/persons', (req, res) => {
     Contact.find({}).then(contacts=>{
@@ -87,7 +75,7 @@ app.delete('/api/persons/:id', (req, res, next)=> {
 })
 
 
-app.post("/api/persons", (req, res) => {
+app.post("/api/persons", (req, res, next) => {
     const body = req.body
     if (body.name === undefined || body.number === undefined){
         return res.status(400).json({error: 'name or number missing'})
@@ -98,20 +86,29 @@ app.post("/api/persons", (req, res) => {
         number: body.number
     })
 
-    contact.save().then(savedContact => {
-        res.json(savedContact)
+    contact.save()
+        .then(savedContact => {
+            res.json(savedContact)
     })
+    .catch(error=> next(error))
 })
 
-app.put("/api/persons/:id",(req,res, next)=>{
-    const body = req.body
-    const contact = {name: body.name, number: body.number}
-    Contact.findByIdAndUpdate(req.params.id, contact, {new: true})
+app.put("/api/persons/:id",(req,res, next) => {
+    const {name, number} = req.body
+
+    Contact.findByIdAndUpdate(
+        req.params.id, 
+        {name, number}, 
+        {new: true, runvalidators: true, context: 'query'}
+    )
         .then (updatedContact => {
             res.json(updatedContact)
         })
         .catch(error => next(error))
 })
+
+app.use(unknownEndpoint)
+app.use(errorHandler)
 
 const PORT = process.env.PORT
     app.listen(PORT, () => {
